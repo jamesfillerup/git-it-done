@@ -9,6 +9,7 @@ var formSubmitHandler = function(event) {
     var username = nameInputEl.value.trim();
         if (username) {
             getUserRepos(username);
+            repoContainerEl.textContent = '';
             nameInputEl.value = "";
         }
         else {
@@ -22,15 +23,27 @@ var getUserRepos = function(user) {
     //make a requerst to the url
     fetch(apiUrl)
         .then(function(response) {
-        response.json().then(function(data) {
-            displayRepos(data, user);
-            console.log(data);
-        });
+            if (response.ok) {
+            response.json().then(function(data) {
+                displayRepos(data, user);
+            });
+            } else {
+            alert("Error: GitHub User Not Found");
+            }
+    })
+    .catch(function(error){
+        // Notice this `.catch()` getting chained onto the end of the `.then()` method
+        alert("Unable to connect with Github");
     });
 };
 
 var displayRepos = function(repos, searchTerm) {
-repoContainerEl.textContent = "";
+    //check it api returned any repos
+    if (repos.length === 0){
+        repoContainerEl.textContent= "No repositories found.";
+        return;
+    }
+
 repoSearchTerm.textContent = searchTerm;
 
         // loop over repos
@@ -63,7 +76,7 @@ repoSearchTerm.textContent = searchTerm;
 
         // append to container
         repoEl.appendChild(statusEl);
-        
+
         // append container to the dom
         repoContainerEl.appendChild(repoEl);
     }
